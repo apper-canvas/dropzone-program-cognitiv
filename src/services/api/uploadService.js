@@ -96,8 +96,24 @@ class UploadService {
         throw new Error(response.message);
       }
 
+// Check if we have results and valid data
+      if (!response.results || response.results.length === 0) {
+        throw new Error('No results returned from create operation');
+      }
+
+      const result = response.results[0];
+      if (!result.success) {
+        const errorMessage = result.message || 'Failed to create default settings';
+        console.error(errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      if (!result.data) {
+        throw new Error('No data returned from successful create operation');
+      }
+
       return {
-        Id: response.results[0].data.Id,
+        Id: result.data.Id,
         autoCompress: false,
         chunkSize: 1048576,
         chunkedUpload: false,
