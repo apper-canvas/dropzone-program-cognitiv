@@ -298,8 +298,8 @@ const FileUploader = () => {
       )}
 
       {/* File List */}
-      {files.length === 0 ? (
-        <Empty onAction={() => {/* Handled by drop zone */}} />
+{files.length === 0 ? (
+        <Empty />
       ) : (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
