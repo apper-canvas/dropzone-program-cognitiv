@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import 'react-toastify/dist/ReactToastify.css';
+
+/* Toast styling */
+.Toastify__toast {
+  font-family: 'Inter', sans-serif;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-height: 56px;
+}
+
+.Toastify__toast-container {
+  z-index: 9999;
+  width: 320px;
+}
+
+.Toastify__toast--success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.Toastify__toast--error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.Toastify__toast--info {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.Toastify__progress-bar {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8fafc;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* File input hidden */
+.file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Drop zone styles */
+.drop-zone {
+  transition: all 0.2s ease-out;
+}
+
+.drop-zone:hover {
+  transform: scale(1.02);
+}
+
+.drop-zone.drag-over {
+  background-color: #eff6ff;
+  border-color: #2563eb;
+  border-width: 3px;
+  transform: scale(1.02);
+}
+
+.drop-zone.drag-over * {
+  pointer-events: none;
+}
+
+/* Progress bar animation */
+.progress-fill {
+  transition: width 0.3s ease-out;
+  background: linear-gradient(90deg, #2563eb 0%, #8b5cf6 100%);
+}
+
+/* File card animations */
+.file-card {
+  animation: slide-in 0.3s ease-out;
+}
+
+.file-card.success .status-icon {
+  animation: bounce-in 0.4s ease-out;
+}
+
+.file-card.success {
+  animation: pulse-success 0.6s ease-out;
+}
+
+.file-card.error {
+  animation: shake-error 0.5s ease-out;
+}
+
+/* Status border colors */
+.status-queued {
+  border-left-color: #64748b;
+}
+
+.status-uploading {
+  border-left-color: #2563eb;
+}
+
+.status-success {
+  border-left-color: #10b981;
+}
+
+.status-error {
+  border-left-color: #ef4444;
+}

@@ -1,0 +1,80 @@
+[
+  {
+    "Id": 1,
+    "name": "presentation.pptx",
+    "size": 2457600,
+    "type": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "status": "success",
+    "progress": 100,
+    "uploadedBytes": 2457600,
+    "previewUrl": null,
+    "error": null,
+    "uploadedAt": 1703180400000,
+    "uploadDuration": 3200
+  },
+  {
+    "Id": 2,
+    "name": "summer_vacation.mp4",
+    "size": 15728640,
+    "type": "video/mp4",
+    "status": "success",
+    "progress": 100,
+    "uploadedBytes": 15728640,
+    "previewUrl": null,
+    "error": null,
+    "uploadedAt": 1703179800000,
+    "uploadDuration": 8900
+  },
+  {
+    "Id": 3,
+    "name": "report.pdf",
+    "size": 1048576,
+    "type": "application/pdf",
+    "status": "success",
+    "progress": 100,
+    "uploadedBytes": 1048576,
+    "previewUrl": null,
+    "error": null,
+    "uploadedAt": 1703179200000,
+    "uploadDuration": 1800
+  },
+  {
+    "Id": 4,
+    "name": "profile_image.jpg",
+    "size": 524288,
+    "type": "image/jpeg",
+    "status": "success",
+    "progress": 100,
+    "uploadedBytes": 524288,
+    "previewUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD//gA7Q1JFQVR...",
+    "error": null,
+    "uploadedAt": 1703178600000,
+    "uploadDuration": 1200
+  },
+  {
+    "Id": 5,
+    "name": "large_dataset.csv",
+    "size": 52428800,
+    "type": "text/csv",
+    "status": "error",
+    "progress": 67,
+    "uploadedBytes": 35127296,
+    "previewUrl": null,
+    "error": "Network connection interrupted",
+    "uploadedAt": null,
+    "uploadDuration": null
+  },
+  {
+    "Id": 6,
+    "name": "music_track.mp3",
+    "size": 4194304,
+    "type": "audio/mpeg",
+    "status": "success",
+    "progress": 100,
+    "uploadedBytes": 4194304,
+    "previewUrl": null,
+    "error": null,
+    "uploadedAt": 1703177400000,
+    "uploadDuration": 2800
+  }
+]
