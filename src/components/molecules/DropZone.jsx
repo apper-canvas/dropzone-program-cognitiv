@@ -13,7 +13,7 @@ const DropZone = ({
   const [dragCounter, setDragCounter] = useState(0);
   const fileInputRef = useRef(null);
 
-  const validateFile = useCallback((file) => {
+const validateFile = useCallback((file) => {
     if (file.size > maxFileSize) {
       return `File "${file.name}" is too large. Maximum size is ${Math.round(maxFileSize / 1024 / 1024)}MB.`;
     }
@@ -26,7 +26,10 @@ const DropZone = ({
         if (type.startsWith(".")) {
           return type.slice(1).toLowerCase() === fileExtension;
         }
-        return mimeType.startsWith(type);
+        if (type.includes("*")) {
+          return mimeType.startsWith(type.split("*")[0]);
+        }
+        return mimeType === type;
       });
       
       if (!isAccepted) {

@@ -1,6 +1,28 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
 import ApperIcon from "@/components/ApperIcon";
+import { useAuth } from "@/layouts/Root";
+import Button from "@/components/atoms/Button";
+
+const LogoutButton = () => {
+  const { user, isAuthenticated } = useSelector(state => state.user);
+  const { logout } = useAuth();
+
+  if (!isAuthenticated) return null;
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      icon="LogOut"
+      onClick={logout}
+      className="text-gray-600 hover:text-gray-800"
+    >
+      Logout
+    </Button>
+  );
+};
 
 const Layout = () => {
   return (
@@ -21,7 +43,7 @@ const Layout = () => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+<div className="flex items-center space-x-4">
               <div className="hidden md:flex items-center space-x-6 text-sm text-gray-600">
                 <div className="flex items-center space-x-2">
                   <ApperIcon name="Shield" className="w-4 h-4 text-success" />
@@ -36,6 +58,8 @@ const Layout = () => {
                   <span>100MB Max</span>
                 </div>
               </div>
+              
+              <LogoutButton />
             </div>
           </div>
         </div>

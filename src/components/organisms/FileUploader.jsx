@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import ApperIcon from "@/components/ApperIcon";
-import DropZone from "@/components/molecules/DropZone";
-import FileCard from "@/components/molecules/FileCard";
-import Button from "@/components/atoms/Button";
 import { uploadService } from "@/services/api/uploadService";
+import ApperIcon from "@/components/ApperIcon";
+import FileCard from "@/components/molecules/FileCard";
+import DropZone from "@/components/molecules/DropZone";
 import Loading from "@/components/ui/Loading";
-import ErrorView from "@/components/ui/ErrorView";
 import Empty from "@/components/ui/Empty";
+import ErrorView from "@/components/ui/ErrorView";
+import Button from "@/components/atoms/Button";
 
 const FileUploader = () => {
   const [files, setFiles] = useState([]);
@@ -46,7 +46,7 @@ const FileUploader = () => {
   };
 
   const simulateUpload = useCallback(async (fileObj) => {
-    const totalSteps = 10;
+const totalSteps = 10;
     const stepDelay = 200;
     
     for (let step = 0; step <= totalSteps; step++) {
@@ -60,8 +60,8 @@ const FileUploader = () => {
           f.id === fileObj.id 
             ? { 
                 ...f, 
-                progress,
-                uploadedBytes,
+                progress: progress,
+                uploadedBytes: uploadedBytes,
                 status: progress === 100 ? "success" : "uploading"
               }
             : f
@@ -84,7 +84,7 @@ const FileUploader = () => {
     );
   }, []);
 
-  const handleFilesSelected = useCallback(async (selectedFiles, errors) => {
+const handleFilesSelected = useCallback(async (selectedFiles, errors) => {
     // Show validation errors
     if (errors.length > 0) {
       errors.forEach(error => toast.error(error));
@@ -96,36 +96,72 @@ const FileUploader = () => {
     const newFiles = selectedFiles.map(file => ({
       id: generateFileId(),
       file,
+      Name: file.name,
       name: file.name,
       size: file.size,
+      size_c: file.size,
       type: file.type,
+      type_c: file.type,
       status: "queued",
+      status_c: "queued",
       progress: 0,
+      progress_c: 0,
       uploadedBytes: 0,
+      uploaded_bytes_c: 0,
       previewUrl: createPreviewUrl(file),
+      preview_url_c: createPreviewUrl(file),
       error: null,
-      uploadedAt: null
+      error_c: null,
+      uploadedAt: null,
+      uploaded_at_c: null
     }));
 
     // Add files to state
     setFiles(prevFiles => [...prevFiles, ...newFiles]);
 
-    // Start uploads
+    // Start uploads using the service
     for (const fileObj of newFiles) {
       try {
         // Update status to uploading
         setFiles(prevFiles => 
           prevFiles.map(f => 
             f.id === fileObj.id 
-              ? { ...f, status: "uploading" }
+              ? { ...f, status: "uploading", status_c: "uploading" }
               : f
           )
         );
 
-        await simulateUpload(fileObj);
-        toast.success(`${fileObj.name} uploaded successfully!`);
+        // Use the upload service to handle the actual upload and database storage
+        const result = await uploadService.uploadFile(fileObj.file, (progressData) => {
+          setFiles(prevFiles => 
+            prevFiles.map(f => 
+              f.id === fileObj.id 
+                ? { 
+                    ...f, 
+                    progress: progressData.progress,
+                    progress_c: progressData.progress,
+                    uploadedBytes: progressData.uploadedBytes,
+                    uploaded_bytes_c: progressData.uploadedBytes,
+                    status: progressData.status,
+                    status_c: progressData.status
+                  }
+                : f
+            )
+          );
+        });
+        
+        // Final update with database record ID
+        setFiles(prevFiles => 
+          prevFiles.map(f => 
+            f.id === fileObj.id 
+              ? { ...f, Id: result.recordId, uploadedAt: Date.now(), uploaded_at_c: Date.now() }
+              : f
+          )
+        );
+        
+        toast.success(`${fileObj.Name} uploaded successfully!`);
       } catch (err) {
-        console.error(`Upload failed for ${fileObj.name}:`, err);
+        console.error(`Upload failed for ${fileObj.Name}:`, err);
         
         setFiles(prevFiles => 
           prevFiles.map(f => 
@@ -133,79 +169,129 @@ const FileUploader = () => {
               ? { 
                   ...f, 
                   status: "error",
-                  error: err.message || "Upload failed"
+                  status_c: "error",
+                  error: err.message || "Upload failed",
+                  error_c: err.message || "Upload failed"
                 }
               : f
           )
         );
         
-        toast.error(`Failed to upload ${fileObj.name}: ${err.message}`);
+        toast.error(`Failed to upload ${fileObj.Name}: ${err.message}`);
       }
     }
   }, [simulateUpload]);
-
-  const handleRemoveFile = useCallback((fileId) => {
-    const fileToRemove = files.find(f => f.id === fileId);
+const handleRemoveFile = useCallback(async (fileId) => {
+const fileToRemove = files.find(f => (f.Id || f.id) === fileId);
     if (!fileToRemove) return;
 
-    // Clean up preview URL if it exists
-    if (fileToRemove.previewUrl) {
-      URL.revokeObjectURL(fileToRemove.previewUrl);
-    }
-
-    setFiles(prevFiles => prevFiles.filter(f => f.id !== fileId));
-    toast.info(`${fileToRemove.name} removed`);
-  }, [files]);
-
-  const handleClearAll = useCallback(() => {
-    // Clean up all preview URLs
-    files.forEach(file => {
-      if (file.previewUrl) {
-        URL.revokeObjectURL(file.previewUrl);
+    try {
+      // Clean up preview URL if it exists
+      if (fileToRemove.previewUrl || fileToRemove.preview_url_c) {
+        URL.revokeObjectURL(fileToRemove.previewUrl || fileToRemove.preview_url_c);
       }
-    });
-    
-    setFiles([]);
-    toast.info("All files cleared");
+
+      // Remove from database if it has an ID
+      if (fileToRemove.Id) {
+        await uploadService.deleteUpload(fileToRemove.Id);
+      }
+
+      setFiles(prevFiles => prevFiles.filter(f => (f.Id || f.id) !== fileId));
+      toast.info(`${fileToRemove.Name || fileToRemove.name} removed`);
+    } catch (error) {
+      console.error("Error removing file:", error);
+      toast.error("Failed to remove file");
+    }
   }, [files]);
 
-  const handleRetryError = useCallback(async (fileId) => {
-    const file = files.find(f => f.id === fileId);
-    if (!file || file.status !== "error") return;
+const handleClearAll = useCallback(async () => {
+    try {
+      // Clean up all preview URLs
+      files.forEach(file => {
+        if (file.previewUrl || file.preview_url_c) {
+          URL.revokeObjectURL(file.previewUrl || file.preview_url_c);
+        }
+      });
+      
+      // Clear from database
+      await uploadService.clearHistory();
+      
+      setFiles([]);
+      toast.info("All files cleared");
+    } catch (error) {
+      console.error("Error clearing files:", error);
+      toast.error("Failed to clear all files");
+    }
+  }, [files]);
+
+const handleRetryError = useCallback(async (fileId) => {
+    const file = files.find(f => (f.Id || f.id) === fileId);
+    if (!file || (file.status_c || file.status) !== "error") return;
 
     try {
       setFiles(prevFiles => 
         prevFiles.map(f => 
-          f.id === fileId 
+          (f.Id || f.id) === fileId 
             ? { 
                 ...f, 
                 status: "uploading", 
-                progress: 0, 
+                status_c: "uploading",
+                progress: 0,
+                progress_c: 0, 
                 uploadedBytes: 0,
-                error: null 
+                uploaded_bytes_c: 0,
+                error: null,
+                error_c: null 
               }
             : f
         )
       );
 
-      await simulateUpload(file);
-      toast.success(`${file.name} uploaded successfully!`);
-    } catch (err) {
-      console.error(`Retry failed for ${file.name}:`, err);
+      const result = await uploadService.uploadFile(file.file, (progressData) => {
+        setFiles(prevFiles => 
+          prevFiles.map(f => 
+            (f.Id || f.id) === fileId 
+              ? { 
+                  ...f, 
+                  progress: progressData.progress,
+                  progress_c: progressData.progress,
+                  uploadedBytes: progressData.uploadedBytes,
+                  uploaded_bytes_c: progressData.uploadedBytes,
+                  status: progressData.status,
+                  status_c: progressData.status
+                }
+              : f
+          )
+        );
+      });
+      
       setFiles(prevFiles => 
         prevFiles.map(f => 
-          f.id === fileId 
+          (f.Id || f.id) === fileId 
+            ? { ...f, Id: result.recordId, uploadedAt: Date.now(), uploaded_at_c: Date.now() }
+            : f
+        )
+      );
+      
+      toast.success(`${file.Name || file.name} uploaded successfully!`);
+    } catch (err) {
+      console.error(`Retry failed for ${file.Name || file.name}:`, err);
+      setFiles(prevFiles => 
+        prevFiles.map(f => 
+          (f.Id || f.id) === fileId 
             ? { 
                 ...f, 
                 status: "error",
-                error: err.message || "Upload failed"
+                status_c: "error",
+                error: err.message || "Upload failed",
+                error_c: err.message || "Upload failed"
               }
             : f
         )
       );
-      toast.error(`Retry failed for ${file.name}: ${err.message}`);
+      toast.error(`Retry failed for ${file.Name || file.name}: ${err.message}`);
     }
-  }, [files, simulateUpload]);
+  }, [files]);
 
   const retryAll = useCallback(async () => {
     setError("");
@@ -223,12 +309,12 @@ const FileUploader = () => {
   }, []);
 
   // Calculate stats
-  const stats = {
+const stats = {
     total: files.length,
-    uploading: files.filter(f => f.status === "uploading").length,
-    completed: files.filter(f => f.status === "success").length,
-    failed: files.filter(f => f.status === "error").length,
-    queued: files.filter(f => f.status === "queued").length
+    uploading: files.filter(f => (f.status_c || f.status) === "uploading").length,
+    completed: files.filter(f => (f.status_c || f.status) === "success").length,
+    failed: files.filter(f => (f.status_c || f.status) === "error").length,
+    queued: files.filter(f => (f.status_c || f.status) === "queued").length
   };
 
   if (loading) {
@@ -246,7 +332,7 @@ const FileUploader = () => {
   return (
     <div className="space-y-6">
       {/* Upload Zone */}
-      <DropZone
+<DropZone
         onFilesSelected={handleFilesSelected}
         acceptedTypes={uploadSettings.acceptedTypes}
         maxFileSize={uploadSettings.maxFileSize}
@@ -314,8 +400,8 @@ const FileUploader = () => {
                 size="sm"
                 icon="RotateCcw"
                 onClick={() => {
-                  files.filter(f => f.status === "error").forEach(f => {
-                    handleRetryError(f.id);
+files.filter(f => (f.status_c || f.status) === "error").forEach(f => {
+                    handleRetryError(f.Id || f.id);
                   });
                 }}
                 className="text-error border-error hover:bg-error hover:text-white"
@@ -326,9 +412,9 @@ const FileUploader = () => {
           </div>
           
           <div className="space-y-3">
-            {files.map((file) => (
+{files.map((file) => (
               <FileCard
-                key={file.id}
+                key={file.Id || file.id}
                 file={file}
                 onRemove={handleRemoveFile}
                 showRemove={true}

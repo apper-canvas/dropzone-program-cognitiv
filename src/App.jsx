@@ -1,11 +1,13 @@
 import React from "react";
 import { RouterProvider } from "react-router-dom";
+import { Provider } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { router } from "./router";
+import { store } from "./store/store";
 
 function App() {
   return (
-    <>
+    <Provider store={store}>
       <RouterProvider router={router} />
       <ToastContainer
         position="top-right"
@@ -21,7 +23,7 @@ function App() {
         toastClassName="font-sans"
         style={{ zIndex: 9999 }}
       />
-    </>
+    </Provider>
   );
 }
 
